@@ -21,7 +21,7 @@
 			prop: 'revisions',
 			rvprop: 'ids|sha1',
 			pageids: mw.config.get( 'wgArticleId' ),
-			rvlimit: 10,
+			rvlimit: 50,
 			formatversion: 2,
 			continue: ''
 		} ).done( function ( data ) {
