@@ -9,11 +9,11 @@
 	function formatDiff() {
 		mw.util.addCSS(
 			// Highlight edits which were undone
-			'#mw-diff-ntitle1 { background: #ffe099; }' +
+			'.diff-ntitle { background: #ffe099; }' +
 			// If the edit was a vandalism, it is safe to patrol (someone undid it)
-			'#mw-diff-ntitle1 .patrollink { background: #cfc; }'
+			'.diff-ntitle .patrollink { background: #cfc; }'
 		);
-		$( '#mw-diff-ntitle1' )
+		$( '.diff-ntitle' )
 			.attr(
 				'title',
 				'After this edit, the page was restored to an older revision'
