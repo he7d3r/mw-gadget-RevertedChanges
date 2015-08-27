@@ -7,7 +7,12 @@
 	'use strict';
 
 	function formatDiff() {
-		mw.util.addCSS( '#mw-diff-ntitle1 { background: #ffe099; }' );
+		mw.util.addCSS(
+			// Highlight edits which were undone
+			'#mw-diff-ntitle1 { background: #ffe099; }' +
+			// If the edit was a vandalism, it is safe to patrol (someone undid it)
+			'#mw-diff-ntitle1 .patrollink { background: #cfc; }'
+		);
 		$( '#mw-diff-ntitle1' )
 			.attr(
 				'title',
@@ -28,11 +33,19 @@
 			var revs = data.query.pages[0].revisions,
 				curSha1 = revs[0].sha1,
 				i;
+			// Find the index of the revision being viewed by the user
 			for( i = 1; i < revs.length; i++ ) {
 				if( revs[i].revid === mw.config.get( 'wgRevisionId' ) ) {
 					break;
 				}
 			}
+			if( i + 1 < revs.length && revs[i].sha1 === revs[ i + 1 ].sha1 ) {
+				// Ignore page moves, page protections, etc
+				// which don't change the existing content
+				return;
+			}
+			// Check if the latest revision equals to a revision
+			// older than the one being viewed by the user
 			for( i++; i < revs.length; i++ ) {
 				if( revs[i].sha1 === curSha1 ) {
 					// Someone restored an older revision of the page, by
