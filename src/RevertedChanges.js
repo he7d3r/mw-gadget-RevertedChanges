@@ -57,7 +57,7 @@
 		} );
 	}
 
-	if ( mw.util.getParamValue( 'diff' ) !== null ) {
+	if ( mw.util.getParamValue( 'diff' ) !== null && mw.config.get( 'wgArticleId' ) !== 0 ) {
 		$.when(
 			mw.loader.using( [ 'mediawiki.api' ] ),
 			$.ready
