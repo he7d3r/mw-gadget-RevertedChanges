@@ -8,25 +8,22 @@
 	'use strict';
 
 	function formatDiff() {
-		mw.util.addCSS(
-			// Highlight edits which were undone
-			'.diff-ntitle { background: #ffe099; }' +
-			// If the edit was a vandalism, it is safe to patrol (someone undid it)
-			'.diff-ntitle .patrollink { background: #cfc; }'
-		);
 		$( '.diff-ntitle' )
+			.css( 'background', '#ffe099' )
 			.attr(
 				'title',
 				'After this edit, the page was restored to an older revision'
-			);
+			)
+			.find( '.patrollink' )
+				.css( 'background', '#cfc' );
 	}
 
-	function checkHistory() {
+	function checkHistory( pageId, revId ) {
 		( new mw.Api() ).get( {
 			action: 'query',
 			prop: 'revisions',
 			rvprop: 'ids|sha1',
-			pageids: mw.config.get( 'wgArticleId' ),
+			pageids: pageId,
 			rvlimit: 50,
 			formatversion: 2,
 			continue: ''
@@ -36,7 +33,7 @@
 				i;
 			// Find the index of the revision being viewed by the user
 			for ( i = 1; i < revs.length; i++ ) {
-				if ( revs[ i ].revid === mw.config.get( 'wgRevisionId' ) ) {
+				if ( revs[ i ].revid === revId ) {
 					break;
 				}
 			}
@@ -58,11 +55,31 @@
 		} );
 	}
 
-	if ( mw.util.getParamValue( 'diff' ) !== null && mw.config.get( 'wgArticleId' ) !== 0 ) {
-		$.when(
-			mw.loader.using( [ 'mediawiki.api' ] ),
-			$.ready
-		).then( checkHistory );
-	}
+	mw.hook( 'wikipage.diff' ).add( function ( diffTable ) {
+		mw.loader.using( [ 'mediawiki.api', 'mediawiki.util' ] )
+		.done( function () {
+			var revId;
+			if ( mw.util.getParamValue( 'diff' ) !== null && mw.config.get( 'wgArticleId' ) !== 0 ) {
+				checkHistory( mw.config.get( 'wgArticleId' ), mw.config.get( 'wgRevisionId' ) );
+				return;
+			} else {
+				revId = parseInt( mw.util.getParamValue(
+						'oldid',
+						$( diffTable )
+							.find( '.diff-ntitle a[href*="oldid="]:first' )
+							.attr( 'href' )
+					), 10 );
+				( new mw.Api() ).get( {
+					action: 'query',
+					prop: 'revisions',
+					rvprop: 'ids',
+					revids: revId,
+					formatversion: 2
+				} ).done( function ( data ) {
+					checkHistory( data.query.pages[ 0 ].pageid, revId );
+				} );
+			}
+		} );
+	} );
 
 }( mediaWiki, jQuery ) );
