@@ -69,6 +69,9 @@
 							.find( '.diff-ntitle a[href*="oldid="]:first' )
 							.attr( 'href' )
 					), 10 );
+				if ( !revId ) {
+					return;
+				}
 				( new mw.Api() ).get( {
 					action: 'query',
 					prop: 'revisions',
